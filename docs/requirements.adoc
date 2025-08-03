@@ -1,7 +1,4 @@
 = Pet Tracking Application - Task Specification
-:toc:
-:icons: font
-:sectnums:
 
 == Description
 
@@ -96,4 +93,4 @@ If you have any questions during implementation, feel free to reach out for clar
 * Who would use this endpoint?
 ** Most likely some kind of Admin UI to check how many pets are outside every device's power save area. I do not know exactly why could this API be used? In general if is for metrics or create internal alerts, this should be send to some platform like datadog, if is to send specific alerts per device to users, probably a better idea to do it as soon as we notice that the device is out of the save zone area.
 
-image::tractive.drawio.svg[Pet Tracking System Diagram, width=600]
+image::tractive.drawio.svg[Pet Tracking System Diagram]
