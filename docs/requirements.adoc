@@ -1,0 +1,99 @@
+= Pet Tracking Application - Task Specification
+:toc:
+:icons: font
+:sectnums:
+
+== Description
+
+Develop a Java/Kotlin application that calculates the number of pets (dogs and cats)
+outside of the power saving zone based on data from different types of trackers.
+
+There are:
+* Two types of trackers for cats: small and big
+* Three types of trackers for dogs: small, medium, and big
+
+The application should receive data from these trackers through a REST API,
+store the data, and allow querying the stored data via the same API.
+
+The application should be implemented using:
+* Java 11+ or Kotlin
+* Spring Boot 2+
+* Include tests
+* Support easy replacement of the storage layer
+
+== Requirements
+
+. Develop a REST API that:
+* Receives pet tracking data
+* Allows querying stored data
+* Provides information about the number of pets currently outside the power saving zone, grouped by pet type and tracker type
+
+. Define a `Pet` entity with attributes:
+* `petType` (Cat or Dog)
+* `trackerType` (Type of tracker)
+* `ownerId` (Integer)
+* `inZone` (Boolean — true if inside the zone, false if outside)
+
+. Define a `Cat` entity (extends `Pet`) with an additional attribute:
+* `lostTracker` (Boolean — true if tracker is lost, false if tracker is attached to cat)
+
+. Use an **in-memory database** to store the received pet count data.
+* Design the application to support easy replacement of the storage layer with a persistent database.
+
+. Include **unit and integration tests** to ensure application correctness.
+* Use appropriate testing frameworks to cover critical components and scenarios.
+
+. Provide concise documentation describing:
+* How to run the application
+* How to run tests
+* How to interact with the REST API
+
+== Expected Output
+
+* Well-organized and high-quality code applying modern best practices
+* Adherence to RESTful principles (resource naming, HTTP methods, status codes)
+* Sufficient and effective test coverage
+* No UI required
+* Example `curl` requests demonstrating API usage
+
+== Time Expectation
+
+We expect you to spend about 2-3 hours on this task. If it takes longer, please submit your progress as is.
+
+== Submission
+
+* Share your source code repository (GitHub, GitLab, etc.) with the implemented solution
+* Include instructions for running the application and tests
+
+== Notes
+
+If you have any questions during implementation, feel free to reach out for clarifications or further details.
+
+
+
+== Requirements breakdown
+* Why is this business case even needed
+* It does not consider authorization, even though of this is sensitive data due pet location, in lots of cases is equal to owners location.
+** Assumption: This whole use case is for a admin platform to see a all the pets that are outside the safe area (This barely makes sense at all, I cannot think a use case in which a human should see this, most likely should be consumed by an alert system that triggers alerts in case a pet is outside the safe zone)
+
+1. Receives pet tracking data
+* Who would use this endpoint
+** Assumption: This service is going to be used by another service, probably a consumer of events Kafka or MQTT, it does not make sense to have an IOT device using REST
+* When the initial data is created?
+** Assumption: When a tracking device is assigned/registered to a pet, the tracking data will be initially created
+* When the initial data is updated?
+** Assumption: When a tracking device transmits its location a consumer will read the data process it, calculates if a tracking device is outside the power saving zone and send the request to store that the device is out of the power saving zone
+
+
+2. Allows querying stored data
+* Who would use this endpoint?
+** Assumption: This service will be used by an admin UI or User UI to see tracking data for a specific pet, this will be done by pet Id of the pet or by the id of the user
+* When this endpoint will be used?
+** Assumption: This service will be used by an admin or user ui to check if a specific pet is out of the energy save zone
+
+
+3. Provides information about the number of pets currently outside the power saving zone, grouped by pet type and tracker type
+* Who would use this endpoint?
+** Most likely some kind of Admin UI to check how many pets are outside every device's power save area. I do not know exactly why could this API be used? In general if is for metrics or create internal alerts, this should be send to some platform like datadog, if is to send specific alerts per device to users, probably a better idea to do it as soon as we notice that the device is out of the save zone area.
+
+
