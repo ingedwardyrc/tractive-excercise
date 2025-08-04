@@ -94,6 +94,7 @@ If you have any questions during implementation, feel free to reach out for clar
 
 == Possible Architecture Diagram
 Created a possible architecture diagram for the Pet Tracking System to understand the requirements better.
+
 image::tractive.drawio.svg[Pet Tracking System Diagram]
 
 
