@@ -99,7 +99,7 @@ If you have any questions during implementation, feel free to reach out for clar
 ** I do not know exactly why this API could be needed. In general, if it is for metrics or to create internal alerts, this should be sent to some platform like Datadog. If it is to send specific alerts per device to users or someone in tractive, it is probably a better idea to do it as soon as we notice that the device is out of the energy save zone area. but for the sake of the exercise, I will implement it.
 
 == Possible Architecture Diagram
-Created a possible architecture diagram for the Pet Tracking System to understand the requirements better.
+Created a possible architecture diagram for the Pet Tracking System to understand the requirements better. The only endpoints to implement are the ones in green color.
 
 image::tractive.drawio.svg[Pet Tracking System Diagram]
 
