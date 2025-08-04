@@ -67,30 +67,39 @@ We expect you to spend about 2-3 hours on this task. If it takes longer, please 
 If you have any questions during implementation, feel free to reach out for clarifications or further details.
 
 
+== Requirements Breakdown = Why is this business case needed?
 
-== Requirements breakdown
-* Why is this business case even needed
-* It does not consider authorization, even though of this is sensitive data due pet location, in lots of cases is equal to owners location.
-** Assumption: This whole use case is for a admin platform to see a all the pets that are outside the safe area (This barely makes sense at all, I cannot think a use case in which a human should see this, most likely should be consumed by an alert system that triggers alerts in case a pet is outside the safe zone)
+=== 1. Receives Pet Tracking Data
+==== Who would use this endpoint?
+** Assumption: This service is going to be used by another service, probably a consumer of events (Kafka or MQTT). It does not make sense to have an IoT device using REST.
 
-1. Receives pet tracking data
-* Who would use this endpoint
-** Assumption: This service is going to be used by another service, probably a consumer of events Kafka or MQTT, it does not make sense to have an IOT device using REST
-* When the initial data is created?
-** Assumption: When a tracking device is assigned/registered to a pet, the tracking data will be initially created
-* When the initial data is updated?
-** Assumption: When a tracking device transmits its location a consumer will read the data process it, calculates if a tracking device is outside the power saving zone and send the request to store that the device is out of the power saving zone
+==== When is the initial data created?
+** Assumption: When a tracking device is assigned/registered to a pet, the tracking data will be initially created.
 
+==== When is the initial data updated?
+** Assumption: When a tracking device transmits its location, a consumer will read the data, process it, calculate if a tracking device is outside the power-saving zone, and send the request to store that the device is out of the power-saving zone.
 
-2. Allows querying stored data
-* Who would use this endpoint?
-** Assumption: This service will be used by an admin UI or User UI to see tracking data for a specific pet, this will be done by pet Id of the pet or by the id of the user
-* When this endpoint will be used?
-** Assumption: This service will be used by an admin or user ui to check if a specific pet is out of the energy save zone
+=== 2. Allows Querying Stored Data
+==== Who would use this endpoint?
+** Assumption: This service will be used by an admin UI or owner UI (mobile or web) to see tracking data for a specific pet. This query will be done by the pet ID or the pet or by the ID of the owner.
 
+==== When will this endpoint be used?
+** Assumption: This service will be used by an admin or owner UI to check if a specific pet is out of the energy save zone. Low throughput by an tractive admin API, higher throughput by a owner API.
 
-3. Provides information about the number of pets currently outside the power saving zone, grouped by pet type and tracker type
-* Who would use this endpoint?
-** Most likely some kind of Admin UI to check how many pets are outside every device's power save area. I do not know exactly why could this API be used? In general if is for metrics or create internal alerts, this should be send to some platform like datadog, if is to send specific alerts per device to users, probably a better idea to do it as soon as we notice that the device is out of the save zone area.
+=== 3. Provides Information About Pets Outside the Power-Saving Zone Grouped by pet type and tracker type.
 
+==== Who would use this endpoint?
+** Assumption: Most likely some kind of admin UI to check how many pets are outside every device's power save area.
+** I do not know exactly why this API could be needed. In general, if it is for metrics or to create internal alerts, this should be sent to some platform like Datadog. If it is to send specific alerts per device to users or someone in tractive, it is probably a better idea to do it as soon as we notice that the device is out of the energy save zone area. but for the sake of the exercise, I will implement it.
+
+== Possible Architecture Diagram
+Created a possible architecture diagram for the Pet Tracking System to understand the requirements better.
 image::tractive.drawio.svg[Pet Tracking System Diagram]
+
+
+** Assumption: It does not consider authorization, even though this is sensitive data due to pet location, which in many cases is equal to the owner's location.
+** Assumption: It does not consider the case of multiple trackers per pet
+** Assumption: It does not consider the case of multiple pets per tracker
+** Assumption: It does not consider the case of multiple owners per pet
+** Assumption: It does not consider the case of multiple owners per tracker
+** Assumption: No geospatial calculations are needed for this use case, the data about the coordinates of the pet and the energy save zone area is not needed for this use case, it is assumed the calculation of the energy save zone is done by the tracker or a intermediate service and the only data is sent to the service is if the tracker is out of the energy save zone or not.
