@@ -72,6 +72,12 @@ If you have any questions during implementation, feel free to reach out for clar
 === 1. Receives Pet Tracking Data
 ==== Who would use this endpoint?
 ** Assumption: This service is going to be used by another service, probably a consumer of events (Kafka or MQTT). It does not make sense to have an IoT device using REST.
+** Assumption: It does not consider authorization, even though this is sensitive data due to pet location, which in many cases is equal to the owner's location.
+** Assumption: It does not consider the case of multiple trackers per pet
+** Assumption: It does not consider the case of multiple pets per tracker
+** Assumption: It does not consider the case of multiple owners per pet
+** Assumption: It does not consider the case of multiple owners per tracker
+** Assumption: No geospatial calculations are needed for this use case, the data about the coordinates of the pet and the energy save zone area is not needed for this use case, it is assumed the calculation of the energy save zone is done by the tracker or a intermediate service and the only data is sent to the service is if the tracker is out of the energy save zone or not.
 
 ==== When is the initial data created?
 ** Assumption: When a tracking device is assigned/registered to a pet, the tracking data will be initially created.
@@ -97,10 +103,3 @@ Created a possible architecture diagram for the Pet Tracking System to understan
 
 image::tractive.drawio.svg[Pet Tracking System Diagram]
 
-
-** Assumption: It does not consider authorization, even though this is sensitive data due to pet location, which in many cases is equal to the owner's location.
-** Assumption: It does not consider the case of multiple trackers per pet
-** Assumption: It does not consider the case of multiple pets per tracker
-** Assumption: It does not consider the case of multiple owners per pet
-** Assumption: It does not consider the case of multiple owners per tracker
-** Assumption: No geospatial calculations are needed for this use case, the data about the coordinates of the pet and the energy save zone area is not needed for this use case, it is assumed the calculation of the energy save zone is done by the tracker or a intermediate service and the only data is sent to the service is if the tracker is out of the energy save zone or not.
