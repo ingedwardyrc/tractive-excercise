@@ -92,4 +92,67 @@ class PetJpaRepositoryTests {
             .containsExactlyInAnyOrder(PetType.CAT, PetType.DOG);
     }
 
+    @Test
+    void whenCountOutsideZoneGroupedThenReturnsCorrectCounts() {
+        repo.deleteAll();
+
+        var catSmallInZone = new PetEntity();
+        catSmallInZone.setPetType(PetType.CAT);
+        catSmallInZone.setTrackerType(TrackerType.SMALL);
+        catSmallInZone.setOwnerId(1);
+        catSmallInZone.setInZone(false);
+        catSmallInZone.setLostTracker(false);
+        repo.save(catSmallInZone);
+
+        var catSmallOutZone = new PetEntity();
+        catSmallOutZone.setPetType(PetType.CAT);
+        catSmallOutZone.setTrackerType(TrackerType.SMALL);
+        catSmallOutZone.setOwnerId(2);
+        catSmallOutZone.setInZone(false);
+        catSmallOutZone.setLostTracker(true);
+        repo.save(catSmallOutZone);
+
+        var dogBigOutZone = new PetEntity();
+        dogBigOutZone.setPetType(PetType.DOG);
+        dogBigOutZone.setTrackerType(TrackerType.BIG);
+        dogBigOutZone.setOwnerId(3);
+        dogBigOutZone.setInZone(false);
+        dogBigOutZone.setLostTracker(null);
+        repo.save(dogBigOutZone);
+
+        var dogSmallInZone = new PetEntity();
+        dogSmallInZone.setPetType(PetType.DOG);
+        dogSmallInZone.setTrackerType(TrackerType.SMALL);
+        dogSmallInZone.setOwnerId(4);
+        dogSmallInZone.setInZone(true);
+        dogSmallInZone.setLostTracker(null);
+        repo.save(dogSmallInZone);
+
+        List<Object[]> counts = repo.countOutsideZoneGrouped();
+
+        assertThat(counts).hasSize(2);
+
+        boolean foundCatSmall = false;
+        boolean foundDogBig = false;
+
+        for (Object[] row : counts) {
+            PetType petType = (PetType) row[0];
+            TrackerType trackerType = (TrackerType) row[1];
+            Long count = (Long) row[2];
+
+            if (petType == PetType.CAT && trackerType == TrackerType.SMALL) {
+                assertThat(count).isEqualTo(2L);
+                foundCatSmall = true;
+            } else if (petType == PetType.DOG && trackerType == TrackerType.BIG) {
+                assertThat(count).isEqualTo(1L);
+                foundDogBig = true;
+            } else {
+                throw new AssertionError("Unexpected grouping: " + petType + " " + trackerType);
+            }
+        }
+
+        assertThat(foundCatSmall).isTrue();
+        assertThat(foundDogBig).isTrue();
+    }
+
 }

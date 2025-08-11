@@ -6,11 +6,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.tractive.pettracker.api.dto.OutsideZoneSummaryDTO;
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.application.exceptions.NotFoundException;
 import com.tractive.pettracker.application.service.PetServiceImpl;
 import com.tractive.pettracker.data.PetRepository;
 import com.tractive.pettracker.domain.Cat;
+import com.tractive.pettracker.domain.OutOfZoneCount;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
 import com.tractive.pettracker.domain.TrackerType;
@@ -242,4 +244,27 @@ class PetServiceImplTest {
         assertThrows(NotFoundException.class, () -> petService.update(999L, updateDto));
     }
 
+    @Test
+    void whenOutOfZoneSummaryThenReturnsCorrectDtoList() {
+        var counts = List.of(
+            new OutOfZoneCount(PetType.CAT, TrackerType.SMALL, 5),
+            new OutOfZoneCount(PetType.DOG, TrackerType.BIG, 2)
+        );
+
+        when(petRepository.countOutsideZoneGrouped()).thenReturn(counts);
+
+        var result = petService.outOfZoneSummary();
+
+        assertThat(result.size()).isEqualTo(2);
+
+        OutsideZoneSummaryDTO first = result.get(0);
+        assertThat(first.petType()).isEqualTo(PetType.CAT);
+        assertThat(first.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(first.count()).isEqualTo(5L);
+
+        OutsideZoneSummaryDTO second = result.get(1);
+        assertThat(second.petType()).isEqualTo(PetType.DOG);
+        assertThat(second.trackerType()).isEqualTo(TrackerType.BIG);
+        assertThat(second.count()).isEqualTo(2L);
+    }
 }

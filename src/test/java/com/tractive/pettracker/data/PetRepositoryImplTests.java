@@ -164,4 +164,28 @@ class PetRepositoryImplTests {
         assertThat(second).isNotInstanceOf(Cat.class);
         assertThat(second.getPetType()).isEqualTo(PetType.DOG);
     }
+
+    @Test
+    void countOutsideZoneGroupedShouldReturnMappedResults() {
+        Object[] row1 = new Object[] { PetType.CAT, TrackerType.SMALL, 3L };
+        Object[] row2 = new Object[] { PetType.DOG, TrackerType.BIG, 5L };
+
+        when(jpa.countOutsideZoneGrouped()).thenReturn(List.of(row1, row2));
+
+        var results = repo.countOutsideZoneGrouped();
+
+        assertThat(results).hasSize(2);
+
+        var catCount = results.stream()
+            .filter(c -> c.getPetType() == PetType.CAT && c.getTrackerType() == TrackerType.SMALL)
+            .findFirst().orElse(null);
+        assertThat(catCount).isNotNull();
+        assertThat(catCount.getCount()).isEqualTo(3);
+
+        var dogCount = results.stream()
+            .filter(c -> c.getPetType() == PetType.DOG && c.getTrackerType() == TrackerType.BIG)
+            .findFirst().orElse(null);
+        assertThat(dogCount).isNotNull();
+        assertThat(dogCount.getCount()).isEqualTo(5);
+    }
 }

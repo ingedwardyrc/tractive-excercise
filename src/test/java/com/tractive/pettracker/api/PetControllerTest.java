@@ -127,14 +127,13 @@ class PetControllerTest {
 
         when(petService.update(10L, petRequestDTO)).thenReturn(petResponseDTO);
 
-        mvc.perform(put("/api/pets") // should be PUT for update
+        mvc.perform(put("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"petType":"DOG","trackerType":"MEDIUM","ownerId":456,"inZone":true,"lostTracker":null}
                 """))
             .andExpect(status().isMethodNotAllowed());
 
-        // Correct PUT test:
         mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/pets/{id}", 10L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -146,7 +145,7 @@ class PetControllerTest {
             .andExpect(jsonPath("$.trackerType").value("MEDIUM"))
             .andExpect(jsonPath("$.ownerId").value(456))
             .andExpect(jsonPath("$.inZone").value(true))
-            .andExpect(jsonPath("$.lostTracker").doesNotExist()); // null value not serialized by default
+            .andExpect(jsonPath("$.lostTracker").doesNotExist());
     }
 
     @Test
@@ -176,7 +175,6 @@ class PetControllerTest {
 
     @Test
     void whenCreatePetWithMissingRequiredFieldReturns400() throws Exception {
-        // ownerId missing (required field)
         mvc.perform(post("/api/pets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""

@@ -3,8 +3,10 @@ package com.tractive.pettracker.data;
 import com.tractive.pettracker.data.jpa.PetEntity;
 import com.tractive.pettracker.data.jpa.PetJpaRepository;
 import com.tractive.pettracker.domain.Cat;
+import com.tractive.pettracker.domain.OutOfZoneCount;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
+import com.tractive.pettracker.domain.TrackerType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +49,19 @@ public class PetRepositoryImpl implements PetRepository {
         return out;
     }
 
+    @Override
+    public List<OutOfZoneCount> countOutsideZoneGrouped() {
+        List<Object[]> rows = jpa.countOutsideZoneGrouped();
+        List<OutOfZoneCount> out = new ArrayList<>();
+        for (Object[] r : rows) {
+            PetType petType = (PetType) r[0];
+            TrackerType trackerType = (TrackerType) r[1];
+            Long cnt = (Long) r[2];
+            out.add(new OutOfZoneCount(petType, trackerType, cnt.intValue()));
+        }
+        return out;
+    }
+
     private PetEntity toEntity(Pet pet) {
         PetEntity e = new PetEntity();
         e.setId(pet.getId());
@@ -66,4 +81,5 @@ public class PetRepositoryImpl implements PetRepository {
             return new Pet(e.getId(), e.getPetType(), e.getTrackerType(), e.getOwnerId(), e.getInZone());
         }
     }
+
 }

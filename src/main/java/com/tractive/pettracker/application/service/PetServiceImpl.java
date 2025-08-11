@@ -6,6 +6,7 @@ import com.tractive.pettracker.api.dto.PetResponseDTO;
 import com.tractive.pettracker.application.exceptions.NotFoundException;
 import com.tractive.pettracker.data.PetRepository;
 import com.tractive.pettracker.domain.Cat;
+import com.tractive.pettracker.domain.OutOfZoneCount;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
 import java.util.ArrayList;
@@ -54,8 +55,14 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public List<OutsideZoneSummaryDTO> outOfZoneSummary() {
-        return null;
+        List<OutOfZoneCount> counts = petRepository.countOutsideZoneGrouped();
+        List<OutsideZoneSummaryDTO> out = new ArrayList<>();
+        for (OutOfZoneCount c : counts) {
+            out.add(new OutsideZoneSummaryDTO(c.getPetType(), c.getTrackerType(), c.getCount()));
+        }
+        return out;
     }
+
 
     // Add validation to ensure that if is not cat and has lost tracker throws an error
     private Pet toDomain(Long id, PetRequestDTO petRequestDTO) {
