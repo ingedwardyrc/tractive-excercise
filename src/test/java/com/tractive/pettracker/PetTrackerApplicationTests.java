@@ -47,9 +47,9 @@ class PetTrackerApplicationTests {
 			.andExpect(jsonPath("$.lostTracker").value(false))
 			.andReturn();
 
-		var createdBody = result.getResponse().getContentAsString();
-		var createdJson = objectMapper.readTree(createdBody);
-		var id = createdJson.get("id").asLong();
+		var createdPetBody = result.getResponse().getContentAsString();
+		var createdPetJson = objectMapper.readTree(createdPetBody);
+		var id = createdPetJson.get("id").asLong();
 
 		mockMvc.perform(get("/api/pets/{id}", id).accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
