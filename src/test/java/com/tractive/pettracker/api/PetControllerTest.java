@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
+import com.tractive.pettracker.application.exceptions.NotFoundException;
 import com.tractive.pettracker.application.service.PetService;
 import com.tractive.pettracker.domain.PetType;
 import com.tractive.pettracker.domain.TrackerType;
@@ -60,4 +61,27 @@ class PetControllerTest {
             .andExpect(jsonPath("$.lostTracker").value(true));
     }
 
+
+    @Test
+    void whenGetUnknownIdThenReturns404WithErrorAndMessage() throws Exception {
+        when(petService.getById(5L)).thenThrow(new NotFoundException("Pet 5 not found"));
+
+        mvc.perform(get("/api/pets/{id}", 5L).accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+            .andExpect(jsonPath("$.message").value("Pet 5 not found"));
+    }
+
+    @Test
+    void whenCreateCatWithInvalidTrackerThenReturns400WithErrorAndMessage() throws Exception {
+        mvc.perform(post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"petType":"CAT","trackerType":"MEDIUM","ownerId":123,"inZone":false,"lostTracker":false}
+                """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
+            .andExpect(jsonPath("$.details.trackerType").value("Cats can only have SMALL or BIG trackers"));
+    }
 }

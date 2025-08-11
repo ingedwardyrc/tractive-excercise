@@ -91,6 +91,24 @@ class PetTrackerApplicationTests {
 	@Test
 	void whenGetUnknownIdThenReturns404() throws Exception {
 		mockMvc.perform(get("/api/pets/{id}", 9_999_999L).accept(MediaType.APPLICATION_JSON))
-			.andExpect(status().isNotFound());
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.error").value("NOT_FOUND"))
+			.andExpect(jsonPath("$.message").value("Pet 9999999 not found"));
+	}
+
+	@Test
+	void whenCreateCatWithInvalidTrackerThenReturns400WithValidationPayload() throws Exception {
+		var invalidRequestJson = """
+            {"petType":"CAT","trackerType":"MEDIUM","ownerId":123,"inZone":false,"lostTracker":false}
+        """;
+
+		mockMvc.perform(
+				post("/api/pets")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON)
+					.content(invalidRequestJson))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
+			.andExpect(jsonPath("$.details.trackerType").value("Cats can only have SMALL or BIG trackers"));
 	}
 }
