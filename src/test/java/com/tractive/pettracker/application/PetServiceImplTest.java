@@ -1,18 +1,20 @@
 package com.tractive.pettracker.application;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.tractive.pettracker.api.dto.PetRequestDTO;
-import com.tractive.pettracker.api.dto.PetResponseDTO;
+import com.tractive.pettracker.application.exceptions.NotFoundException;
 import com.tractive.pettracker.application.service.PetServiceImpl;
 import com.tractive.pettracker.data.PetRepository;
 import com.tractive.pettracker.domain.Cat;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
 import com.tractive.pettracker.domain.TrackerType;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,94 +36,144 @@ class PetServiceImplTest {
     }
 
     @Test
-    void WhenCreatedCatShouldSavedDomainObjectWithAllFields() {
-        PetRequestDTO petRequestDTO = new PetRequestDTO(PetType.CAT, TrackerType.SMALL, 1, true, true);
+    void whenCreateCatThenSavedDomainObjectMatchesAndResponseMapped() {
+        var requestDto = new PetRequestDTO(PetType.CAT, TrackerType.SMALL, 1, true, true);
 
-        when(petRepository.save(any(Pet.class))).thenAnswer(inv -> {
-            Cat c = (Cat) inv.getArgument(0);
-            return new Cat(100L, c.getTrackerType(), c.getOwnerId(), c.getInZone(), c.getLostTracker());
+        when(petRepository.save(any(Pet.class))).thenAnswer(invocation -> {
+            var savedCat = (Cat) invocation.getArgument(0);
+            return new Cat(100L, savedCat.getTrackerType(), savedCat.getOwnerId(), savedCat.getInZone(), savedCat.getLostTracker());
         });
 
-        PetResponseDTO r = service.create(petRequestDTO);
+        var responseDto = service.create(requestDto);
 
-        ArgumentCaptor<Pet> captor = ArgumentCaptor.forClass(Pet.class);
-        verify(petRepository).save(captor.capture());
+        var petCaptor = ArgumentCaptor.forClass(Pet.class);
+        verify(petRepository).save(petCaptor.capture());
 
-        var expectedMappedPet = new Cat(
-            null,              // id is null before persist
-            TrackerType.SMALL,
-            1,
-            true,
-            true
-        );
+        var expectedCat = new Cat(null, TrackerType.SMALL, 1, true, true);
 
-        assertThat(captor.getValue())
-            .isInstanceOf(Cat.class);
-        assertThat((Cat) captor.getValue())
+        assertThat(petCaptor.getValue()).isInstanceOf(Cat.class);
+        assertThat((Cat) petCaptor.getValue())
             .usingRecursiveComparison()
             .ignoringFields("id")
-            .isEqualTo(expectedMappedPet);
+            .isEqualTo(expectedCat);
 
-        assertThat(r.id()).isEqualTo(100L);
-        assertThat(r.petType()).isEqualTo(PetType.CAT);
-        assertThat(r.trackerType()).isEqualTo(TrackerType.SMALL);
-        assertThat(r.ownerId()).isEqualTo(1);
-        assertThat(r.inZone()).isTrue();
-        assertThat(r.lostTracker()).isEqualTo(true);
+        assertThat(responseDto.id()).isEqualTo(100L);
+        assertThat(responseDto.petType()).isEqualTo(PetType.CAT);
+        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(responseDto.ownerId()).isEqualTo(1);
+        assertThat(responseDto.inZone()).isTrue();
+        assertThat(responseDto.lostTracker()).isEqualTo(true);
     }
 
     @Test
-    void WhenCreatedPetShouldSavedDomainObjectWithAllFieldsAndLostTrackerNull() {
-        PetRequestDTO petRequestDTO = new PetRequestDTO(PetType.DOG, TrackerType.SMALL, 1, true, null);
+    void whenCreateDogThenSavedDomainObjectMatchesAndResponseMappedWithLostNull() {
+        var requestDto = new PetRequestDTO(PetType.DOG, TrackerType.SMALL, 1, true, null);
 
-        when(petRepository.save(any(Pet.class))).thenAnswer(inv -> {
-            Pet c = (Pet) inv.getArgument(0);
-            return new Pet(100L, PetType.DOG, c.getTrackerType(), c.getOwnerId(), c.getInZone());
+        when(petRepository.save(any(Pet.class))).thenAnswer(invocation -> {
+            var savedPet = (Pet) invocation.getArgument(0);
+            return new Pet(100L, PetType.DOG, savedPet.getTrackerType(), savedPet.getOwnerId(), savedPet.getInZone());
         });
 
-        PetResponseDTO r = service.create(petRequestDTO);
+        var responseDto = service.create(requestDto);
 
-        ArgumentCaptor<Pet> captor = ArgumentCaptor.forClass(Pet.class);
-        verify(petRepository).save(captor.capture());
+        var petCaptor = ArgumentCaptor.forClass(Pet.class);
+        verify(petRepository).save(petCaptor.capture());
 
-        var expectedMappedPet = new Pet(
-            null,
-            PetType.DOG,
-            TrackerType.SMALL,
-            1,
-            true
-        );
+        var expectedPet = new Pet(null, PetType.DOG, TrackerType.SMALL, 1, true);
 
-        assertThat(captor.getValue())
-            .isInstanceOf(Pet.class);
-        assertThat((Pet) captor.getValue())
+        assertThat(petCaptor.getValue()).isInstanceOf(Pet.class);
+        assertThat((Pet) petCaptor.getValue())
             .usingRecursiveComparison()
             .ignoringFields("id")
-            .isEqualTo(expectedMappedPet);
+            .isEqualTo(expectedPet);
 
-        assertThat(r.id()).isEqualTo(100L);
-        assertThat(r.petType()).isEqualTo(PetType.DOG);
-        assertThat(r.trackerType()).isEqualTo(TrackerType.SMALL);
-        assertThat(r.ownerId()).isEqualTo(1);
-        assertThat(r.inZone()).isTrue();
-        assertThat(r.lostTracker()).isEqualTo(null);
+        assertThat(responseDto.id()).isEqualTo(100L);
+        assertThat(responseDto.petType()).isEqualTo(PetType.DOG);
+        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(responseDto.ownerId()).isEqualTo(1);
+        assertThat(responseDto.inZone()).isTrue();
+        assertThat(responseDto.lostTracker()).isEqualTo(null);
     }
 
     @Test
-    void WhenCreateWillMapAllFieldsToPet() {
-        PetRequestDTO petRequestDTO = new PetRequestDTO(PetType.CAT, TrackerType.SMALL, 1, false, null);
-        ArgumentCaptor<Pet> captor = ArgumentCaptor.forClass(Pet.class);
-        when(petRepository.save(captor.capture())).thenAnswer(inv -> {
-            Pet p = captor.getValue();
-            p.setId(10L);
-            return p;
+    void whenCreatePetThenMapsAllFields() {
+        var requestDto = new PetRequestDTO(PetType.CAT, TrackerType.SMALL, 1, false, null);
+        var petCaptor = ArgumentCaptor.forClass(Pet.class);
+
+        when(petRepository.save(petCaptor.capture())).thenAnswer(invocation -> {
+            var capturedPet = petCaptor.getValue();
+            capturedPet.setId(10L);
+            return capturedPet;
         });
 
-        PetResponseDTO created = service.create(petRequestDTO);
-        assertThat(created.id()).isEqualTo(10L);
-        assertThat(created.petType()).isEqualTo(PetType.CAT);
-        assertThat(created.trackerType()).isEqualTo(TrackerType.SMALL);
-        assertThat(created.ownerId()).isEqualTo(1);
-        assertThat(created.inZone()).isFalse();
+        var createdPet = service.create(requestDto);
+        assertThat(createdPet.id()).isEqualTo(10L);
+        assertThat(createdPet.petType()).isEqualTo(PetType.CAT);
+        assertThat(createdPet.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(createdPet.ownerId()).isEqualTo(1);
+        assertThat(createdPet.inZone()).isFalse();
+    }
+
+    @Test
+    void whenCreateWithNullRequestThenThrowsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> service.create(null));
+    }
+
+    @Test
+    void whenCreateCatWithNullLostThenDefaultsLostToFalse() {
+        var requestDto = new PetRequestDTO(PetType.CAT, TrackerType.BIG, 77, true, null);
+
+        when(petRepository.save(any(Pet.class))).thenAnswer(invocation -> {
+            var savedCat = (Cat) invocation.getArgument(0);
+            assertThat(savedCat.getLostTracker()).isFalse();
+            return new Cat(5L, savedCat.getTrackerType(), savedCat.getOwnerId(), savedCat.getInZone(), savedCat.getLostTracker());
+        });
+
+        var responseDto = service.create(requestDto);
+
+        assertThat(responseDto.id()).isEqualTo(5L);
+        assertThat(responseDto.petType()).isEqualTo(PetType.CAT);
+        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.BIG);
+        assertThat(responseDto.ownerId()).isEqualTo(77);
+        assertThat(responseDto.inZone()).isTrue();
+        assertThat(responseDto.lostTracker()).isEqualTo(false);
+    }
+
+    @Test
+    void whenGetByIdCatThenReturnsMappedDtoIncludingLost() {
+        when(petRepository.findById(42L)).thenReturn(
+            Optional.of(new Cat(42L, TrackerType.SMALL, 123, true, true))
+        );
+
+        var responseDto = service.getById(42L);
+
+        assertThat(responseDto.id()).isEqualTo(42L);
+        assertThat(responseDto.petType()).isEqualTo(PetType.CAT);
+        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(responseDto.ownerId()).isEqualTo(123);
+        assertThat(responseDto.inZone()).isTrue();
+        assertThat(responseDto.lostTracker()).isEqualTo(true);
+    }
+
+    @Test
+    void whenGetByIdDogThenReturnsMappedDtoWithLostNull() {
+        when(petRepository.findById(7L)).thenReturn(
+            Optional.of(new Pet(7L, PetType.DOG, TrackerType.MEDIUM, 55, false))
+        );
+
+        var responseDto = service.getById(7L);
+
+        assertThat(responseDto.id()).isEqualTo(7L);
+        assertThat(responseDto.petType()).isEqualTo(PetType.DOG);
+        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.MEDIUM);
+        assertThat(responseDto.ownerId()).isEqualTo(55);
+        assertThat(responseDto.inZone()).isEqualTo(false);
+        assertThat(responseDto.lostTracker()).isEqualTo(null);
+    }
+
+    @Test
+    void whenGetByIdMissingThenThrowsNotFound() {
+        when(petRepository.findById(999L)).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> service.getById(999L));
     }
 }

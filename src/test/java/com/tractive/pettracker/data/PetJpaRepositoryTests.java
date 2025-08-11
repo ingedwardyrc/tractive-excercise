@@ -13,25 +13,46 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class PetJpaRepositoryTests {
 
-    @Autowired PetJpaRepository repo;
+    @Autowired
+    PetJpaRepository repo;
 
     @Test
-    void save_and_find_roundTrip_cat_includingLost() {
-        PetEntity e = new PetEntity();
-        e.setPetType(PetType.CAT);
-        e.setTrackerType(TrackerType.SMALL);
-        e.setOwnerId(42);
-        e.setInZone(true);
-        e.setLostTracker(true);
+    void whenSaveCatThenRoundTripsIncludingLost() {
+        var petEntity = new PetEntity();
+        petEntity.setPetType(PetType.CAT);
+        petEntity.setTrackerType(TrackerType.SMALL);
+        petEntity.setOwnerId(42);
+        petEntity.setInZone(true);
+        petEntity.setLostTracker(true);
 
-        PetEntity saved = repo.save(e);
-        assertThat(saved.getId()).isNotNull();
+        var savedPetEntity = repo.save(petEntity);
+        assertThat(savedPetEntity.getId()).isNotNull();
 
-        PetEntity found = repo.findById(saved.getId()).orElseThrow();
-        assertThat(found.getPetType()).isEqualTo(PetType.CAT);
-        assertThat(found.getTrackerType()).isEqualTo(TrackerType.SMALL);
-        assertThat(found.getOwnerId()).isEqualTo(42);
-        assertThat(found.getInZone()).isTrue();
-        assertThat(found.getLostTracker()).isTrue();
+        var foundPetEntity = repo.findById(savedPetEntity.getId()).orElseThrow();
+        assertThat(foundPetEntity.getPetType()).isEqualTo(PetType.CAT);
+        assertThat(foundPetEntity.getTrackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(foundPetEntity.getOwnerId()).isEqualTo(42);
+        assertThat(foundPetEntity.getInZone()).isTrue();
+        assertThat(foundPetEntity.getLostTracker()).isTrue();
+    }
+
+    @Test
+    void whenSaveDogThenLostIsNullAndRoundTrips() {
+        var petEntity = new PetEntity();
+        petEntity.setPetType(PetType.DOG);
+        petEntity.setTrackerType(TrackerType.MEDIUM);
+        petEntity.setOwnerId(7);
+        petEntity.setInZone(false);
+        petEntity.setLostTracker(null);
+
+        var savedPetEntity = repo.save(petEntity);
+        assertThat(savedPetEntity.getId()).isNotNull();
+
+        var foundPetEntity = repo.findById(savedPetEntity.getId()).orElseThrow();
+        assertThat(foundPetEntity.getPetType()).isEqualTo(PetType.DOG);
+        assertThat(foundPetEntity.getTrackerType()).isEqualTo(TrackerType.MEDIUM);
+        assertThat(foundPetEntity.getOwnerId()).isEqualTo(7);
+        assertThat(foundPetEntity.getInZone()).isFalse();
+        assertThat(foundPetEntity.getLostTracker()).isNull();
     }
 }

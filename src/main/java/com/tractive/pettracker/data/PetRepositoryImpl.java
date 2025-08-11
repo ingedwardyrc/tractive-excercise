@@ -5,6 +5,7 @@ import com.tractive.pettracker.data.jpa.PetJpaRepository;
 import com.tractive.pettracker.domain.Cat;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -22,6 +23,11 @@ public class PetRepositoryImpl implements PetRepository {
         entity.setId(null);
         PetEntity saved = jpa.save(entity);
         return toDomain(saved);
+    }
+
+    @Override
+    public Optional<Pet> findById(Long id) {
+        return jpa.findById(id).map(this::toDomain);
     }
 
     private PetEntity toEntity(Pet pet) {

@@ -2,6 +2,7 @@ package com.tractive.pettracker.application.service;
 
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
+import com.tractive.pettracker.application.exceptions.NotFoundException;
 import com.tractive.pettracker.data.PetRepository;
 import com.tractive.pettracker.domain.Cat;
 import com.tractive.pettracker.domain.Pet;
@@ -28,7 +29,8 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public PetResponseDTO getById(Long id) {
-        return null;
+        Pet pet = petRepository.findById(id).orElseThrow(() -> new NotFoundException("Pet %d not found".formatted(id)));
+        return toResponse(pet);
     }
 
     // Add validation to ensure that if is not cat and has lost tracker throws an error
