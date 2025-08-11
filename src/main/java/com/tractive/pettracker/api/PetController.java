@@ -26,4 +26,9 @@ public class PetController implements PetControllerApi {
             .toUri();
         return ResponseEntity.created(location).body(created);
     }
+
+    @Override
+    public ResponseEntity<PetResponseDTO> get(Long id) {
+        return ResponseEntity.ok(petService.getById(id));
+    }
 }

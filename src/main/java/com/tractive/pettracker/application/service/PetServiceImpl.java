@@ -26,6 +26,11 @@ public class PetServiceImpl implements PetService {
         return toResponse(saved);
     }
 
+    @Override
+    public PetResponseDTO getById(Long id) {
+        return null;
+    }
+
     // Add validation to ensure that if is not cat and has lost tracker throws an error
     private Pet toDomain(Long id, PetRequestDTO petRequestDTO) {
         if (petRequestDTO.petType() == PetType.CAT) {

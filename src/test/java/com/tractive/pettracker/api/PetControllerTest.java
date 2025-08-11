@@ -2,6 +2,7 @@ package com.tractive.pettracker.api;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,6 +45,19 @@ class PetControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", containsString("/api/pets/1")))
                 .andExpect(jsonPath("$.id").value(1));
+    }
+
+    @Test
+    void whenGetPetThenReturns200AndPet() throws Exception {
+        var response = new PetResponseDTO(42L, PetType.CAT, TrackerType.BIG, 55, true, true);
+        when(petService.getById(42L)).thenReturn(response);
+
+        mvc.perform(get("/api/pets/{id}", 42L))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(42))
+            .andExpect(jsonPath("$.petType").value("CAT"))
+            .andExpect(jsonPath("$.trackerType").value("BIG"))
+            .andExpect(jsonPath("$.lostTracker").value(true));
     }
 
 }
