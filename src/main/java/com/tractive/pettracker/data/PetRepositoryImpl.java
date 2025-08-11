@@ -28,6 +28,14 @@ public class PetRepositoryImpl implements PetRepository {
     }
 
     @Override
+    public Pet update(Pet pet) {
+        if (pet.getId() == null) throw new IllegalArgumentException("id required for update");
+        PetEntity entity = toEntity(pet);
+        PetEntity saved = jpa.save(entity);
+        return toDomain(saved);
+    }
+
+    @Override
     public Optional<Pet> findById(Long id) {
         return jpa.findById(id).map(this::toDomain);
     }

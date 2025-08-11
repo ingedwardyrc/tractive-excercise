@@ -31,7 +31,10 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public PetResponseDTO update(Long id, PetRequestDTO dto) {
-        return null;
+        Pet existing = petRepository.findById(id).orElseThrow(() -> new NotFoundException("Pet %d not found".formatted(id)));
+        Pet updated = toDomain(existing.getId(), dto);
+        Pet saved = petRepository.update(updated);
+        return toResponse(saved);
     }
 
     @Override

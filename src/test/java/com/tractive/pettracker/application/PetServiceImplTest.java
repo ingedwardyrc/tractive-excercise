@@ -216,4 +216,30 @@ class PetServiceImplTest {
         assertThat(dogDto.inZone()).isFalse();
         assertThat(dogDto.lostTracker()).isNull();
     }
+
+    @Test
+    void whenUpdateExistingPetThenReturnsUpdatedPet() {
+        var existingPet = new Pet(1L, PetType.DOG, TrackerType.SMALL, 10, true);
+        when(petRepository.findById(1L)).thenReturn(Optional.of(existingPet));
+        when(petRepository.update(any(Pet.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var updateDto = new PetRequestDTO(PetType.DOG, TrackerType.MEDIUM, 10, false, null);
+        var updatedPetDto = petService.update(1L, updateDto);
+
+        assertThat(updatedPetDto.id()).isEqualTo(1L);
+        assertThat(updatedPetDto.petType()).isEqualTo(PetType.DOG);
+        assertThat(updatedPetDto.trackerType()).isEqualTo(TrackerType.MEDIUM);
+        assertThat(updatedPetDto.ownerId()).isEqualTo(10);
+        assertThat(updatedPetDto.inZone()).isFalse();
+        assertThat(updatedPetDto.lostTracker()).isNull();
+    }
+
+    @Test
+    void whenUpdateNonExistingPetThenThrowsNotFoundException() {
+        when(petRepository.findById(999L)).thenReturn(Optional.empty());
+        var updateDto = new PetRequestDTO(PetType.DOG, TrackerType.SMALL, 10, true, null);
+
+        assertThrows(NotFoundException.class, () -> petService.update(999L, updateDto));
+    }
+
 }
