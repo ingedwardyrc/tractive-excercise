@@ -114,7 +114,6 @@ class PetTrackerApplicationTests {
 
 	@Test
 	void whenListPetsThenReturns200AndListOfPets() throws Exception {
-		// Create first pet
 		var pet1Request = """
         {"petType":"CAT","trackerType":"SMALL","ownerId":1,"inZone":true,"lostTracker":false}
     """;
@@ -127,7 +126,6 @@ class PetTrackerApplicationTests {
 			.andReturn();
 		var pet1Id = objectMapper.readTree(pet1Result.getResponse().getContentAsString()).get("id").asLong();
 
-		// Create second pet
 		var pet2Request = """
         {"petType":"DOG","trackerType":"BIG","ownerId":2,"inZone":false,"lostTracker":true}
     """;
@@ -140,7 +138,6 @@ class PetTrackerApplicationTests {
 			.andReturn();
 		var pet2Id = objectMapper.readTree(pet2Result.getResponse().getContentAsString()).get("id").asLong();
 
-		// List all pets
 		mockMvc.perform(get("/api/pets").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.length()").value(2))
@@ -154,9 +151,42 @@ class PetTrackerApplicationTests {
 
 	@Test
 	void whenListPetsAndEmptyThenReturns200AndEmptyArray() throws Exception {
-		// This test assumes the database starts empty — if not, it should run in an isolated DB/transaction.
 		mockMvc.perform(get("/api/pets").accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.length()").value(0));
 	}
+
+	@Test
+	void whenUpdatePetTrackingDataThenReturns200AndUpdatedPet() throws Exception {
+		var createRequest = """
+        {"petType":"DOG","trackerType":"SMALL","ownerId":10,"inZone":false}
+    """;
+
+		var createResult = mockMvc.perform(
+				post("/api/pets")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON)
+					.content(createRequest))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		var createdPetJson = objectMapper.readTree(createResult.getResponse().getContentAsString());
+		var id = createdPetJson.get("id").asLong();
+
+		var updateRequest = """
+        {"petType":"DOG","trackerType":"MEDIUM","ownerId":10,"inZone":true,"lostTracker":true}
+    """;
+
+		mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/pets/{id}", id)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(updateRequest))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(id))
+			.andExpect(jsonPath("$.petType").value("DOG"))
+			.andExpect(jsonPath("$.trackerType").value("MEDIUM"))
+			.andExpect(jsonPath("$.ownerId").value(10))
+			.andExpect(jsonPath("$.inZone").value(true));
+	}
+
 }
