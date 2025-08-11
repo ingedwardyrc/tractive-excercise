@@ -29,6 +29,11 @@ public class PetController implements PetControllerApi {
     }
 
     @Override
+    public ResponseEntity<PetResponseDTO> update(Long id, PetRequestDTO dto) {
+        return ResponseEntity.ok(petService.update(id, dto));
+    }
+
+    @Override
     public ResponseEntity<PetResponseDTO> get(Long id) {
         return ResponseEntity.ok(petService.getById(id));
     }

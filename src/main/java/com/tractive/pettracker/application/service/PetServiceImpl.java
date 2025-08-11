@@ -30,6 +30,11 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
+    public PetResponseDTO update(Long id, PetRequestDTO dto) {
+        return null;
+    }
+
+    @Override
     public PetResponseDTO getById(Long id) {
         Pet pet = petRepository.findById(id).orElseThrow(() -> new NotFoundException("Pet %d not found".formatted(id)));
         return toResponse(pet);

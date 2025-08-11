@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -116,5 +117,51 @@ class PetControllerTest {
         mvc.perform(get("/api/pets").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    void whenUpdatePetReturns200AndUpdatedPet() throws Exception {
+        var petRequestDTO = new PetRequestDTO(PetType.DOG, TrackerType.MEDIUM, 456, true, null);
+        var petResponseDTO = new PetResponseDTO(10L, PetType.DOG, TrackerType.MEDIUM, 456, true, null);
+
+        when(petService.update(10L, petRequestDTO)).thenReturn(petResponseDTO);
+
+        mvc.perform(put("/api/pets") // should be PUT for update
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"petType":"DOG","trackerType":"MEDIUM","ownerId":456,"inZone":true,"lostTracker":null}
+                """))
+            .andExpect(status().isMethodNotAllowed());
+
+        // Correct PUT test:
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/pets/{id}", 10L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"petType":"DOG","trackerType":"MEDIUM","ownerId":456,"inZone":true,"lostTracker":null}
+                """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(10))
+            .andExpect(jsonPath("$.petType").value("DOG"))
+            .andExpect(jsonPath("$.trackerType").value("MEDIUM"))
+            .andExpect(jsonPath("$.ownerId").value(456))
+            .andExpect(jsonPath("$.inZone").value(true))
+            .andExpect(jsonPath("$.lostTracker").doesNotExist()); // null value not serialized by default
+    }
+
+    @Test
+    void whenUpdateUnknownPetReturns404() throws Exception {
+        var petRequestDTO = new PetRequestDTO(PetType.DOG, TrackerType.MEDIUM, 456, true, null);
+
+        when(petService.update(999L, petRequestDTO))
+            .thenThrow(new NotFoundException("Pet 999 not found"));
+
+        mvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/pets/{id}", 999L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"petType":"DOG","trackerType":"MEDIUM","ownerId":456,"inZone":true,"lostTracker":null}
+                """))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+            .andExpect(jsonPath("$.message").value("Pet 999 not found"));
     }
 }
