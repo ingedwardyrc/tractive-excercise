@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.tractive.pettracker.api.dto.OutsideZoneSummaryDTO;
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
 import com.tractive.pettracker.application.exceptions.NotFoundException;
@@ -194,5 +195,32 @@ class PetControllerTest {
                     {"petType":"INVALID","trackerType":"SMALL","ownerId":123,"inZone":true}
                 """))
             .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenGetOutOfZoneSummaryThenReturns200AndSummaryList() throws Exception {
+        var summary1 = new OutsideZoneSummaryDTO(PetType.CAT, TrackerType.SMALL, 5);
+        var summary2 = new OutsideZoneSummaryDTO(PetType.DOG, TrackerType.BIG, 10);
+
+        when(petService.outOfZoneSummary()).thenReturn(List.of(summary1, summary2));
+
+        mvc.perform(get("/api/pets/out-of-zone-summary").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].petType").value("CAT"))
+            .andExpect(jsonPath("$[0].trackerType").value("SMALL"))
+            .andExpect(jsonPath("$[0].count").value(5))
+            .andExpect(jsonPath("$[1].petType").value("DOG"))
+            .andExpect(jsonPath("$[1].trackerType").value("BIG"))
+            .andExpect(jsonPath("$[1].count").value(10));
+    }
+
+    @Test
+    void whenGetOutOfZoneSummaryEmptyThenReturns200AndEmptyList() throws Exception {
+        when(petService.outOfZoneSummary()).thenReturn(List.of());
+
+        mvc.perform(get("/api/pets/out-of-zone-summary").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(0));
     }
 }

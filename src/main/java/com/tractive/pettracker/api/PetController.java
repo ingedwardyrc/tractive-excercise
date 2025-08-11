@@ -1,5 +1,6 @@
 package com.tractive.pettracker.api;
 
+import com.tractive.pettracker.api.dto.OutsideZoneSummaryDTO;
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
 import com.tractive.pettracker.application.service.PetService;
@@ -41,5 +42,10 @@ public class PetController implements PetControllerApi {
     @Override
     public ResponseEntity<List<PetResponseDTO>> list() {
         return ResponseEntity.ok(petService.list());
+    }
+
+    @Override
+    public ResponseEntity<List<OutsideZoneSummaryDTO>> summary() {
+        return ResponseEntity.ok(petService.outOfZoneSummary());
     }
 }

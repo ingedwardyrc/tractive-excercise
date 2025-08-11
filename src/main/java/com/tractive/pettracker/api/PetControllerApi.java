@@ -1,5 +1,6 @@
 package com.tractive.pettracker.api;
 
+import com.tractive.pettracker.api.dto.OutsideZoneSummaryDTO;
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
 import jakarta.validation.Valid;
@@ -25,4 +26,7 @@ public interface PetControllerApi {
 
     @GetMapping
     ResponseEntity<List<PetResponseDTO>> list();
+
+    @GetMapping("/out-of-zone-summary")
+    ResponseEntity<List<OutsideZoneSummaryDTO>> summary();
 }

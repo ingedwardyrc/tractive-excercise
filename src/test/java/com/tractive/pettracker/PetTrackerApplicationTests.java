@@ -189,4 +189,38 @@ class PetTrackerApplicationTests {
 			.andExpect(jsonPath("$.inZone").value(true));
 	}
 
+	@Test
+	void whenGetOutOfZoneSummaryThenReturns200AndSummaryList() throws Exception {
+		var pet1Request = """
+        {"petType":"CAT","trackerType":"SMALL","ownerId":100,"inZone":false,"lostTracker":true}
+    """;
+		var pet2Request = """
+        {"petType":"DOG","trackerType":"BIG","ownerId":101,"inZone":false,"lostTracker":false}
+    """;
+		var pet3Request = """
+        {"petType":"DOG","trackerType":"BIG","ownerId":102,"inZone":true,"lostTracker":false}
+    """;
+
+		mockMvc.perform(post("/api/pets")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(pet1Request))
+			.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/api/pets")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(pet2Request))
+			.andExpect(status().isCreated());
+
+		mockMvc.perform(post("/api/pets")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(pet3Request))
+			.andExpect(status().isCreated());
+
+		mockMvc.perform(get("/api/pets/out-of-zone-summary")
+				.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.length()").value(2)) // We expect 2 groups: CAT-SMALL and DOG-BIG out of zone
+			.andExpect(jsonPath("$[?(@.petType=='CAT' && @.trackerType=='SMALL')].count").value(1))
+			.andExpect(jsonPath("$[?(@.petType=='DOG' && @.trackerType=='BIG')].count").value(1));
+	}
 }

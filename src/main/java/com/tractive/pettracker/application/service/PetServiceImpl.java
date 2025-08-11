@@ -1,5 +1,6 @@
 package com.tractive.pettracker.application.service;
 
+import com.tractive.pettracker.api.dto.OutsideZoneSummaryDTO;
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
 import com.tractive.pettracker.application.exceptions.NotFoundException;
@@ -49,6 +50,11 @@ public class PetServiceImpl implements PetService {
         List<PetResponseDTO> petDtoList = new ArrayList<>();
         for (Pet p : pets) petDtoList.add(toResponse(p));
         return petDtoList;
+    }
+
+    @Override
+    public List<OutsideZoneSummaryDTO> outOfZoneSummary() {
+        return null;
     }
 
     // Add validation to ensure that if is not cat and has lost tracker throws an error
