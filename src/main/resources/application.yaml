@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: pet-tracker
+  h2:
+    console:
+      enabled: true
+  datasource:
+    url: jdbc:h2:mem:pettrackingdb;MODE=PostgreSQL;DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: pet_tracking_user
+    # move to a vault
+    password: pet_tracking_pass
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    # DB_CLOSE_ON_EXIT Make the migration remain for the application to use
+    url: jdbc:h2:mem:pettrackingdb;MODE=PostgreSQL;IFEXISTS=FALSE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    user: admin
+    # move to a vault
+    password: adminpass
+logging:
+  level:
+    org.hibernate.SQL: INFO
+spring.data.jdbc.repositories.enabled: false
+

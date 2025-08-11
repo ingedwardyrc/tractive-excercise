@@ -17,6 +17,12 @@ The application should be implemented using:
 * Spring Boot 2+
 * Include tests
 * Support easy replacement of the storage layer
+* split the application using clean architecture principles into the 6 layers:
+  * Presentation Layer (Controllers)
+  * Application Layer (Services)
+  * Domain Layer (Entities, Use Cases)
+  * Data Layer (Repositories, Data Sources)
+  * Infrastructure Layer (Configuration, External Services)
 
 == Requirements
 
@@ -24,7 +30,8 @@ The application should be implemented using:
 * Receives pet tracking data
 * Allows querying stored data
 * Provides information about the number of pets currently outside the power saving zone, grouped by pet type and tracker type
-
+* Use interfaces for controllers and services and datasources to allow easier testing and future changes
+* Create unit and integration tests for the API endpoints and business logic
 . Define a `Pet` entity with attributes:
 * `petType` (Cat or Dog)
 * `trackerType` (Type of tracker)
@@ -34,7 +41,7 @@ The application should be implemented using:
 . Define a `Cat` entity (extends `Pet`) with an additional attribute:
 * `lostTracker` (Boolean — true if tracker is lost, false if tracker is attached to cat)
 
-. Use an **in-memory database** to store the received pet count data.
+. Use an **in-memory database** to store the received pet count data. h2
 * Design the application to support easy replacement of the storage layer with a persistent database.
 
 . Include **unit and integration tests** to ensure application correctness.
@@ -52,7 +59,7 @@ The application should be implemented using:
 * Sufficient and effective test coverage
 * No UI required
 * Example `curl` requests demonstrating API usage
-
+* User the best practices for spring applications to
 == Time Expectation
 
 We expect you to spend about 2-3 hours on this task. If it takes longer, please submit your progress as is.
