@@ -15,9 +15,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 class PetTrackerApplicationTests {
 
 	@Autowired
@@ -219,7 +221,7 @@ class PetTrackerApplicationTests {
 		mockMvc.perform(get("/api/pets/out-of-zone-summary")
 				.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.length()").value(2)) // We expect 2 groups: CAT-SMALL and DOG-BIG out of zone
+			.andExpect(jsonPath("$.length()").value(2))
 			.andExpect(jsonPath("$[?(@.petType=='CAT' && @.trackerType=='SMALL')].count").value(1))
 			.andExpect(jsonPath("$[?(@.petType=='DOG' && @.trackerType=='BIG')].count").value(1));
 	}
