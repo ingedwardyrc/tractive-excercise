@@ -7,6 +7,7 @@ import com.tractive.pettracker.data.PetRepository;
 import com.tractive.pettracker.domain.Cat;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -31,6 +32,11 @@ public class PetServiceImpl implements PetService {
     public PetResponseDTO getById(Long id) {
         Pet pet = petRepository.findById(id).orElseThrow(() -> new NotFoundException("Pet %d not found".formatted(id)));
         return toResponse(pet);
+    }
+
+    @Override
+    public List<PetResponseDTO> list() {
+        return null;
     }
 
     // Add validation to ensure that if is not cat and has lost tracker throws an error

@@ -111,4 +111,52 @@ class PetTrackerApplicationTests {
 			.andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
 			.andExpect(jsonPath("$.details.trackerType").value("Cats can only have SMALL or BIG trackers"));
 	}
+
+	@Test
+	void whenListPetsThenReturns200AndListOfPets() throws Exception {
+		// Create first pet
+		var pet1Request = """
+        {"petType":"CAT","trackerType":"SMALL","ownerId":1,"inZone":true,"lostTracker":false}
+    """;
+		var pet1Result = mockMvc.perform(
+				post("/api/pets")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON)
+					.content(pet1Request))
+			.andExpect(status().isCreated())
+			.andReturn();
+		var pet1Id = objectMapper.readTree(pet1Result.getResponse().getContentAsString()).get("id").asLong();
+
+		// Create second pet
+		var pet2Request = """
+        {"petType":"DOG","trackerType":"BIG","ownerId":2,"inZone":false,"lostTracker":true}
+    """;
+		var pet2Result = mockMvc.perform(
+				post("/api/pets")
+					.contentType(MediaType.APPLICATION_JSON)
+					.accept(MediaType.APPLICATION_JSON)
+					.content(pet2Request))
+			.andExpect(status().isCreated())
+			.andReturn();
+		var pet2Id = objectMapper.readTree(pet2Result.getResponse().getContentAsString()).get("id").asLong();
+
+		// List all pets
+		mockMvc.perform(get("/api/pets").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.length()").value(2))
+			.andExpect(jsonPath("$[0].id").value(pet1Id))
+			.andExpect(jsonPath("$[0].petType").value("CAT"))
+			.andExpect(jsonPath("$[0].trackerType").value("SMALL"))
+			.andExpect(jsonPath("$[1].id").value(pet2Id))
+			.andExpect(jsonPath("$[1].petType").value("DOG"))
+			.andExpect(jsonPath("$[1].trackerType").value("BIG"));
+	}
+
+	@Test
+	void whenListPetsAndEmptyThenReturns200AndEmptyArray() throws Exception {
+		// This test assumes the database starts empty — if not, it should run in an isolated DB/transaction.
+		mockMvc.perform(get("/api/pets").accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.length()").value(0));
+	}
 }

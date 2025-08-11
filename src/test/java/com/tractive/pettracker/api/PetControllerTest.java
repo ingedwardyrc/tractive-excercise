@@ -14,6 +14,7 @@ import com.tractive.pettracker.application.exceptions.NotFoundException;
 import com.tractive.pettracker.application.service.PetService;
 import com.tractive.pettracker.domain.PetType;
 import com.tractive.pettracker.domain.TrackerType;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -83,5 +84,37 @@ class PetControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
             .andExpect(jsonPath("$.details.trackerType").value("Cats can only have SMALL or BIG trackers"));
+    }
+
+    @Test
+    void whenListPetsThenReturns200AndListOfPets() throws Exception {
+        var pet1 = new PetResponseDTO(1L, PetType.CAT, TrackerType.SMALL, 123, true, false);
+        var pet2 = new PetResponseDTO(2L, PetType.DOG, TrackerType.BIG, 456, false, true);
+
+        when(petService.list()).thenReturn(List.of(pet1, pet2));
+
+        mvc.perform(get("/api/pets").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(1))
+            .andExpect(jsonPath("$[0].petType").value("CAT"))
+            .andExpect(jsonPath("$[0].trackerType").value("SMALL"))
+            .andExpect(jsonPath("$[0].ownerId").value(123))
+            .andExpect(jsonPath("$[0].inZone").value(true))
+            .andExpect(jsonPath("$[0].lostTracker").value(false))
+            .andExpect(jsonPath("$[1].id").value(2))
+            .andExpect(jsonPath("$[1].petType").value("DOG"))
+            .andExpect(jsonPath("$[1].trackerType").value("BIG"))
+            .andExpect(jsonPath("$[1].ownerId").value(456))
+            .andExpect(jsonPath("$[1].inZone").value(false))
+            .andExpect(jsonPath("$[1].lostTracker").value(true));
+    }
+
+    @Test
+    void whenListPetsAndEmptyThenReturns200AndEmptyArray() throws Exception {
+        when(petService.list()).thenReturn(List.of());
+
+        mvc.perform(get("/api/pets").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(0));
     }
 }

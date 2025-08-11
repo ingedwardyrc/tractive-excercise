@@ -3,6 +3,7 @@ package com.tractive.pettracker.api;
 import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,4 +18,7 @@ public interface PetControllerApi {
 
     @GetMapping("/{id}")
     ResponseEntity<PetResponseDTO> get(@PathVariable Long id);
+
+    @GetMapping
+    ResponseEntity<List<PetResponseDTO>> list();
 }

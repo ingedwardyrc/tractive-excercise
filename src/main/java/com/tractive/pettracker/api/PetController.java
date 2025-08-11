@@ -4,6 +4,7 @@ import com.tractive.pettracker.api.dto.PetRequestDTO;
 import com.tractive.pettracker.api.dto.PetResponseDTO;
 import com.tractive.pettracker.application.service.PetService;
 import java.net.URI;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -30,5 +31,10 @@ public class PetController implements PetControllerApi {
     @Override
     public ResponseEntity<PetResponseDTO> get(Long id) {
         return ResponseEntity.ok(petService.getById(id));
+    }
+
+    @Override
+    public ResponseEntity<List<PetResponseDTO>> list() {
+        return ResponseEntity.ok(petService.list());
     }
 }
