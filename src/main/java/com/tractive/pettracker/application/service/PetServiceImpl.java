@@ -7,6 +7,7 @@ import com.tractive.pettracker.data.PetRepository;
 import com.tractive.pettracker.domain.Cat;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -36,14 +37,17 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public List<PetResponseDTO> list() {
-        return null;
+        List<Pet> pets = petRepository.findAll();
+        List<PetResponseDTO> petDtoList = new ArrayList<>();
+        for (Pet p : pets) petDtoList.add(toResponse(p));
+        return petDtoList;
     }
 
     // Add validation to ensure that if is not cat and has lost tracker throws an error
     private Pet toDomain(Long id, PetRequestDTO petRequestDTO) {
         if (petRequestDTO.petType() == PetType.CAT) {
-            Boolean lost = petRequestDTO.lostTracker() != null ? petRequestDTO.lostTracker() : Boolean.FALSE;
-            return new Cat(id, petRequestDTO.trackerType(), petRequestDTO.ownerId(), petRequestDTO.inZone(), lost);
+            Boolean lostTracker = petRequestDTO.lostTracker() != null ? petRequestDTO.lostTracker() : Boolean.FALSE;
+            return new Cat(id, petRequestDTO.trackerType(), petRequestDTO.ownerId(), petRequestDTO.inZone(), lostTracker);
         } else {
             Pet pet = new Pet(id, petRequestDTO.petType(), petRequestDTO.trackerType(), petRequestDTO.ownerId(), petRequestDTO.inZone());
             return pet;

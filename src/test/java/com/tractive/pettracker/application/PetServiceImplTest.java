@@ -14,6 +14,7 @@ import com.tractive.pettracker.domain.Cat;
 import com.tractive.pettracker.domain.Pet;
 import com.tractive.pettracker.domain.PetType;
 import com.tractive.pettracker.domain.TrackerType;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -175,5 +176,44 @@ class PetServiceImplTest {
     void whenGetByIdMissingThenThrowsNotFound() {
         when(petRepository.findById(999L)).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> petService.getById(999L));
+    }
+
+    @Test
+    void whenListEmptyThenReturnEmptyList() {
+        when(petRepository.findAll()).thenReturn(List.of());
+
+        var result = petService.list();
+
+        assertThat(result).isNotNull();
+        assertThat(result.isEmpty()).isTrue();
+
+    }
+
+    @Test
+    void whenListHasPetsThenReturnMappedDtos() {
+        var cat = new Cat(1L, TrackerType.BIG, 10, true, true);
+        var dog = new Pet(2L, PetType.DOG, TrackerType.SMALL, 20, false);
+
+        when(petRepository.findAll()).thenReturn(List.of(cat, dog));
+
+        var result = petService.list();
+
+        assertThat(result.size()).isEqualTo(2);
+
+        var catDto = result.get(0);
+        assertThat(catDto.id()).isEqualTo(1L);
+        assertThat(catDto.petType()).isEqualTo(PetType.CAT);
+        assertThat(catDto.trackerType()).isEqualTo(TrackerType.BIG);
+        assertThat(catDto.ownerId()).isEqualTo(10);
+        assertThat(catDto.inZone()).isTrue();
+        assertThat(catDto.lostTracker()).isTrue();
+
+        var dogDto = result.get(1);
+        assertThat(dogDto.id()).isEqualTo(2L);
+        assertThat(dogDto.petType()).isEqualTo(PetType.DOG);
+        assertThat(dogDto.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(dogDto.ownerId()).isEqualTo(20);
+        assertThat(dogDto.inZone()).isFalse();
+        assertThat(dogDto.lostTracker()).isNull();
     }
 }

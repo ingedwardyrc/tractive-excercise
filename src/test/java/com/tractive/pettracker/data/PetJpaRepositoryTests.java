@@ -2,12 +2,15 @@ package com.tractive.pettracker.data.jpa;
 
 import com.tractive.pettracker.domain.PetType;
 import com.tractive.pettracker.domain.TrackerType;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -55,4 +58,38 @@ class PetJpaRepositoryTests {
         assertThat(foundPetEntity.getInZone()).isFalse();
         assertThat(foundPetEntity.getLostTracker()).isNull();
     }
+
+    @Test
+    void whenFindByIdNotFoundReturnsEmptyOptional() {
+        Optional<PetEntity> found = repo.findById(-1L);
+        assertThat(found).isEmpty();
+    }
+
+    @Test
+    void whenFindAllReturnsAllSavedEntities() {
+        repo.deleteAll();
+
+        var catEntity = new PetEntity();
+        catEntity.setPetType(PetType.CAT);
+        catEntity.setTrackerType(TrackerType.SMALL);
+        catEntity.setOwnerId(1);
+        catEntity.setInZone(true);
+        catEntity.setLostTracker(false);
+        repo.save(catEntity);
+
+        var dogEntity = new PetEntity();
+        dogEntity.setPetType(PetType.DOG);
+        dogEntity.setTrackerType(TrackerType.BIG);
+        dogEntity.setOwnerId(2);
+        dogEntity.setInZone(false);
+        dogEntity.setLostTracker(null);
+        repo.save(dogEntity);
+
+        List<PetEntity> allPets = repo.findAll();
+
+        assertThat(allPets).hasSize(2);
+        assertThat(allPets).extracting(PetEntity::getPetType)
+            .containsExactlyInAnyOrder(PetType.CAT, PetType.DOG);
+    }
+
 }
