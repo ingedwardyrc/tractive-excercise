@@ -1,5 +1,7 @@
-package com.tractive.pettracker.data.jpa;
+package com.tractive.pettracker.integration;
 
+import com.tractive.pettracker.data.jpa.PetEntity;
+import com.tractive.pettracker.data.jpa.PetJpaRepository;
 import com.tractive.pettracker.domain.PetType;
 import com.tractive.pettracker.domain.TrackerType;
 import java.util.List;

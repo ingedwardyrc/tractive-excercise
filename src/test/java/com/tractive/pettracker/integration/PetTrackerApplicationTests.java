@@ -1,4 +1,4 @@
-package com.tractive.pettracker.api;
+package com.tractive.pettracker.integration;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;

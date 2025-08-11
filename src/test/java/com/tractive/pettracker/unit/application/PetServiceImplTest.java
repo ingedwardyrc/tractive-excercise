@@ -1,4 +1,4 @@
-package com.tractive.pettracker.application;
+package com.tractive.pettracker.unit.application;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;

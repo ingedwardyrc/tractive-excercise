@@ -1,9 +1,10 @@
-package com.tractive.pettracker.data;
+package com.tractive.pettracker.unit.data;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.tractive.pettracker.data.PetRepositoryImpl;
 import com.tractive.pettracker.data.jpa.PetEntity;
 import com.tractive.pettracker.data.jpa.PetJpaRepository;
 import com.tractive.pettracker.domain.Cat;

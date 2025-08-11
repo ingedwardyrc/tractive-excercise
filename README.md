@@ -4,9 +4,18 @@
 ./gradlew clean bootRun
 ```
 
+# Tests
+
 ```bash
 ./gradlew clean test
 ```
+
+## Integration tests
+[integration](src/test/java/com/tractive/pettracker/integration)
+
+## Unit tests
+[unit](src/test/java/com/tractive/pettracker/unit)
+
 
 ### Create (POST)
 ```bash
