@@ -164,4 +164,35 @@ class PetControllerTest {
             .andExpect(jsonPath("$.error").value("NOT_FOUND"))
             .andExpect(jsonPath("$.message").value("Pet 999 not found"));
     }
+
+    @Test
+    void whenCreatePetWithInvalidJsonReturns400() throws Exception {
+        mvc.perform(post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{ invalid json }"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void whenCreatePetWithMissingRequiredFieldReturns400() throws Exception {
+        // ownerId missing (required field)
+        mvc.perform(post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"petType":"DOG","trackerType":"SMALL","inZone":true}
+                """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
+            .andExpect(jsonPath("$.details.ownerId").exists());
+    }
+
+    @Test
+    void whenCreatePetWithInvalidEnumReturns400() throws Exception {
+        mvc.perform(post("/api/pets")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"petType":"INVALID","trackerType":"SMALL","ownerId":123,"inZone":true}
+                """))
+            .andExpect(status().isBadRequest());
+    }
 }
