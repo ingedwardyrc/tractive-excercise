@@ -28,7 +28,7 @@ class PetServiceImplTest {
     private PetRepository petRepository;
 
     @InjectMocks
-    private PetServiceImpl service;
+    private PetServiceImpl petService;
 
     @BeforeEach
     void setup() {
@@ -44,7 +44,7 @@ class PetServiceImplTest {
             return new Cat(100L, savedCat.getTrackerType(), savedCat.getOwnerId(), savedCat.getInZone(), savedCat.getLostTracker());
         });
 
-        var responseDto = service.create(requestDto);
+        var petDto = petService.create(requestDto);
 
         var petCaptor = ArgumentCaptor.forClass(Pet.class);
         verify(petRepository).save(petCaptor.capture());
@@ -57,12 +57,12 @@ class PetServiceImplTest {
             .ignoringFields("id")
             .isEqualTo(expectedCat);
 
-        assertThat(responseDto.id()).isEqualTo(100L);
-        assertThat(responseDto.petType()).isEqualTo(PetType.CAT);
-        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.SMALL);
-        assertThat(responseDto.ownerId()).isEqualTo(1);
-        assertThat(responseDto.inZone()).isTrue();
-        assertThat(responseDto.lostTracker()).isEqualTo(true);
+        assertThat(petDto.id()).isEqualTo(100L);
+        assertThat(petDto.petType()).isEqualTo(PetType.CAT);
+        assertThat(petDto.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(petDto.ownerId()).isEqualTo(1);
+        assertThat(petDto.inZone()).isTrue();
+        assertThat(petDto.lostTracker()).isEqualTo(true);
     }
 
     @Test
@@ -74,7 +74,7 @@ class PetServiceImplTest {
             return new Pet(100L, PetType.DOG, savedPet.getTrackerType(), savedPet.getOwnerId(), savedPet.getInZone());
         });
 
-        var responseDto = service.create(requestDto);
+        var petDto = petService.create(requestDto);
 
         var petCaptor = ArgumentCaptor.forClass(Pet.class);
         verify(petRepository).save(petCaptor.capture());
@@ -87,12 +87,12 @@ class PetServiceImplTest {
             .ignoringFields("id")
             .isEqualTo(expectedPet);
 
-        assertThat(responseDto.id()).isEqualTo(100L);
-        assertThat(responseDto.petType()).isEqualTo(PetType.DOG);
-        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.SMALL);
-        assertThat(responseDto.ownerId()).isEqualTo(1);
-        assertThat(responseDto.inZone()).isTrue();
-        assertThat(responseDto.lostTracker()).isEqualTo(null);
+        assertThat(petDto.id()).isEqualTo(100L);
+        assertThat(petDto.petType()).isEqualTo(PetType.DOG);
+        assertThat(petDto.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(petDto.ownerId()).isEqualTo(1);
+        assertThat(petDto.inZone()).isTrue();
+        assertThat(petDto.lostTracker()).isEqualTo(null);
     }
 
     @Test
@@ -106,7 +106,7 @@ class PetServiceImplTest {
             return capturedPet;
         });
 
-        var createdPet = service.create(requestDto);
+        var createdPet = petService.create(requestDto);
         assertThat(createdPet.id()).isEqualTo(10L);
         assertThat(createdPet.petType()).isEqualTo(PetType.CAT);
         assertThat(createdPet.trackerType()).isEqualTo(TrackerType.SMALL);
@@ -116,7 +116,7 @@ class PetServiceImplTest {
 
     @Test
     void whenCreateWithNullRequestThenThrowsIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> service.create(null));
+        assertThrows(IllegalArgumentException.class, () -> petService.create(null));
     }
 
     @Test
@@ -129,14 +129,14 @@ class PetServiceImplTest {
             return new Cat(5L, savedCat.getTrackerType(), savedCat.getOwnerId(), savedCat.getInZone(), savedCat.getLostTracker());
         });
 
-        var responseDto = service.create(requestDto);
+        var petDto = petService.create(requestDto);
 
-        assertThat(responseDto.id()).isEqualTo(5L);
-        assertThat(responseDto.petType()).isEqualTo(PetType.CAT);
-        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.BIG);
-        assertThat(responseDto.ownerId()).isEqualTo(77);
-        assertThat(responseDto.inZone()).isTrue();
-        assertThat(responseDto.lostTracker()).isEqualTo(false);
+        assertThat(petDto.id()).isEqualTo(5L);
+        assertThat(petDto.petType()).isEqualTo(PetType.CAT);
+        assertThat(petDto.trackerType()).isEqualTo(TrackerType.BIG);
+        assertThat(petDto.ownerId()).isEqualTo(77);
+        assertThat(petDto.inZone()).isTrue();
+        assertThat(petDto.lostTracker()).isEqualTo(false);
     }
 
     @Test
@@ -145,14 +145,14 @@ class PetServiceImplTest {
             Optional.of(new Cat(42L, TrackerType.SMALL, 123, true, true))
         );
 
-        var responseDto = service.getById(42L);
+        var petDto = petService.getById(42L);
 
-        assertThat(responseDto.id()).isEqualTo(42L);
-        assertThat(responseDto.petType()).isEqualTo(PetType.CAT);
-        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.SMALL);
-        assertThat(responseDto.ownerId()).isEqualTo(123);
-        assertThat(responseDto.inZone()).isTrue();
-        assertThat(responseDto.lostTracker()).isEqualTo(true);
+        assertThat(petDto.id()).isEqualTo(42L);
+        assertThat(petDto.petType()).isEqualTo(PetType.CAT);
+        assertThat(petDto.trackerType()).isEqualTo(TrackerType.SMALL);
+        assertThat(petDto.ownerId()).isEqualTo(123);
+        assertThat(petDto.inZone()).isTrue();
+        assertThat(petDto.lostTracker()).isEqualTo(true);
     }
 
     @Test
@@ -161,19 +161,19 @@ class PetServiceImplTest {
             Optional.of(new Pet(7L, PetType.DOG, TrackerType.MEDIUM, 55, false))
         );
 
-        var responseDto = service.getById(7L);
+        var petDto = petService.getById(7L);
 
-        assertThat(responseDto.id()).isEqualTo(7L);
-        assertThat(responseDto.petType()).isEqualTo(PetType.DOG);
-        assertThat(responseDto.trackerType()).isEqualTo(TrackerType.MEDIUM);
-        assertThat(responseDto.ownerId()).isEqualTo(55);
-        assertThat(responseDto.inZone()).isEqualTo(false);
-        assertThat(responseDto.lostTracker()).isEqualTo(null);
+        assertThat(petDto.id()).isEqualTo(7L);
+        assertThat(petDto.petType()).isEqualTo(PetType.DOG);
+        assertThat(petDto.trackerType()).isEqualTo(TrackerType.MEDIUM);
+        assertThat(petDto.ownerId()).isEqualTo(55);
+        assertThat(petDto.inZone()).isEqualTo(false);
+        assertThat(petDto.lostTracker()).isEqualTo(null);
     }
 
     @Test
     void whenGetByIdMissingThenThrowsNotFound() {
         when(petRepository.findById(999L)).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> service.getById(999L));
+        assertThrows(NotFoundException.class, () -> petService.getById(999L));
     }
 }
